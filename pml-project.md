@@ -1,0 +1,59 @@
+Practical Machine Learning Project
+========================================================
+The intent is to model "classe" column  using the remaining columns in the dataset as predictors.Let us first load the data and clean it.
+
+```r
+require(randomForest)
+```
+
+```
+## Loading required package: randomForest
+## randomForest 4.6-10
+## Type rfNews() to see new features/changes/bug fixes.
+```
+
+```r
+set.seed(1011)
+
+traind <- read.csv("pml-training.csv")
+testd <- read.csv("pml-testing.csv")
+traind <-traind[,7:ncol(traind)]
+traind[is.na(traind)] <- 0
+testd <-testd[,7:ncol(testd)]
+testd[is.na(testd)] <- 0
+
+for(i in 1:153){
+  traind[,i] = as.numeric(traind[,i])
+  testd[,i] = as.numeric(testd[,i])
+}
+```
+
+Random Forest is a method of choice to accurately and quickly estimate the caltegorical classe variable. Using all the predictors will lead to a over-fitted model. Using too few would lead to a in-accurate model. rfcv function shows the cross-validated prediction performance of models with sequentially reduced number of predictors (ranked by variable importance) via a nested cross-validation procedure. Based on the cross validation, the right number of predictors to choose would be between 10 and 19.
+
+Now, Let us use the randomForest function to create the model. 
+
+
+```r
+fit=randomForest(classe~.,data=traind,ntree=1000)
+fit
+```
+
+```
+## 
+## Call:
+##  randomForest(formula = classe ~ ., data = traind, ntree = 1000) 
+##                Type of random forest: classification
+##                      Number of trees: 1000
+## No. of variables tried at each split: 12
+## 
+##         OOB estimate of  error rate: 0.2%
+## Confusion matrix:
+##      A    B    C    D    E  class.error
+## A 5579    0    0    0    1 0.0001792115
+## B    4 3793    0    0    0 0.0010534633
+## C    0   10 3411    1    0 0.0032144944
+## D    0    0   18 3197    1 0.0059079602
+## E    0    0    0    4 3603 0.0011089548
+```
+
+Based on the simulation results, the expected class.error is 0.21% with 12 predictors. This appears to be a good model.
